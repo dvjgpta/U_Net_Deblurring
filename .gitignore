@@ -1,31 +1,19 @@
-# Python cache
-__pycache__/
-*.pyc
-
-# Virtual environments
-venv/
-.env/
-
-# Jupyter notebooks checkpoints
-.ipynb_checkpoints/
-
-# Python cache
-__pycache__/
-*.pyc
-
-# Virtual environments
-venv/
-.env/
-
-# Jupyter notebooks checkpoints
-.ipynb_checkpoints/
-
-# Logs, datasets, models
-*.log
-*.csv
-*.pth
-*.pt
-*.h5
-*.ckpt
+# Ignore dataset patches and large data
+patches/
+DIV2K/
 data/
-datasets/
+
+# Ignore python cache and temp files
+__pycache__/
+*.pyc
+*.pyo
+*.swp
+
+# Ignore model checkpoints
+*.pt
+*.pth
+*.ckpt
+
+# Ignore system files
+.DS_Store
+
