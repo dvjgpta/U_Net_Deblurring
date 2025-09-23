@@ -12,6 +12,9 @@ from typing import Tuple,Dict, List
 from torch.utils.data import random_split
 
 
+
+train_transforms = PairedTransforms(resize=(64, 64))
+test_transforms  = PairedTransforms(resize=(64, 64))  # usually no flip for test
 class DeblurDataset(Dataset):
     def __init__(self, blurred_dir, sharp_dir, transform=None):
         self.blurred_dir = blurred_dir
@@ -36,8 +39,9 @@ class DeblurDataset(Dataset):
         sharp_img   = Image.open(sharp_path).convert("RGB")
 
         if self.transform:
-            blurred_img = self.transform(blurred_img)
-            sharp_img   = self.transform(sharp_img)
+            # blurred_img = self.transform(blurred_img)
+            # sharp_img   = self.transform(sharp_img)
+            blurred_img, sharp_img = self.transform(blurred_img, sharp_img)
 
         return blurred_img, sharp_img
 
@@ -91,6 +95,7 @@ class DeblurDataset(Dataset):
 class SubsetWithTransform(Dataset):
     """
     Wraps a subset of a dataset and applies a specific transform.
+    Works with PairedTransforms that expect (img_blur, img_sharp)
     """
     def __init__(self, subset, transform):
         self.subset = subset
@@ -100,11 +105,10 @@ class SubsetWithTransform(Dataset):
         return len(self.subset)
 
     def __getitem__(self, idx):
-        img, target = self.subset[idx]
+        img_blur, img_sharp = self.subset[idx]  # get both images from subset
         if self.transform:
-            img = self.transform(img)
-            target = self.transform(target)
-        return img, target
+            img_blur, img_sharp = self.transform(img_blur, img_sharp)
+        return img_blur, img_sharp
 
 
 def get_dataloaders(blurred_dir, sharp_dir, train_transforms, test_transforms,

@@ -1,5 +1,5 @@
 import torch
-from unet_model import UNet
+from unet_model import *
 from data_loader import *
 import torch.nn as nn
 import torch.optim as optim

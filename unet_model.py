@@ -94,5 +94,3 @@ class UNet(nn.Module):
         self.up4   = torch.utils.checkpoint.checkpoint_sequential([self.up4], 1)
         self.outc  = torch.utils.checkpoint.checkpoint_sequential([self.outc], 1)
 
-
-model_0=UNet()

@@ -55,14 +55,21 @@ from torch.utils.data import DataLoader
 
 
 # Augment train data
-train_transforms = transforms.Compose([
-    transforms.Resize((64, 64)),
-    transforms.RandomHorizontalFlip(p=0.5),
-    transforms.ToTensor()
-])
+class PairedTransforms:
+    def __init__(self, resize=(64, 64), flip_prob=0.5):
+        self.resize = transforms.Resize(resize)
+        self.to_tensor = transforms.ToTensor()
+        self.flip_prob = flip_prob
 
-# Don't augment test data, only reshape
-test_transforms = transforms.Compose([
-    transforms.Resize((64, 64)),
-    transforms.ToTensor()
-])
+    def __call__(self, img_blur, img_sharp):
+        # Resize both
+        img_blur = self.resize(img_blur)
+        img_sharp = self.resize(img_sharp)
+
+        # Random horizontal flip
+        if random.random() < self.flip_prob:
+            img_blur = transforms.functional.hflip(img_blur)
+            img_sharp = transforms.functional.hflip(img_sharp)
+
+        # Convert to tensor
+        return self.to_tensor(img_blur), self.to_tensor(img_sharp)

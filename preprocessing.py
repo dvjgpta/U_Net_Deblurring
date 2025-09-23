@@ -19,21 +19,21 @@ test_dir_blurred= image_path/"val"/"DIV2K_valid_HR_blurred_256"
 
 #print(train_dir_sharp)
 
-random.seed(13)
+# random.seed(13)
 
-# getting all image path in any .png format
-image_path_list=list(image_path.glob("*/*/*.png")) 
+# # getting all image path in any .png format
+# image_path_list=list(image_path.glob("*/*/*.png")) 
 
-# getting a random image path in any .png format
-random_image_path=random.choice(image_path_list)
+# # getting a random image path in any .png format
+# random_image_path=random.choice(image_path_list)
 
-#open image
-img=Image.open(random_image_path)
+# #open image
+# img=Image.open(random_image_path)
 
-#printmetadata
+# #printmetadata
 
-# print(f"Random Image Path:{random_image_path}")
-# print(f"Img Height:{img.height}")
-# print(f"Image Width:{img.width}")
-# img.show()
+# # print(f"Random Image Path:{random_image_path}")
+# # print(f"Img Height:{img.height}")
+# # print(f"Image Width:{img.width}")
+# # img.show()
 
