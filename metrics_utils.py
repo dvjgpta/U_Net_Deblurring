@@ -67,12 +67,18 @@ def plot_training_metrics(results):
     axes[0].legend()
 
     # Plot metrics only for test
-    axes[1].plot(epochs, results['test_psnr'], label='Test PSNR')
-    axes[1].plot(epochs, results['test_ssim'], label='Test SSIM')
-    axes[1].plot(epochs, results['test_lpips'], label='Test LPIPS')
-    axes[1].set_title("Test Metrics over Epochs")
+    # axes[1].plot(epochs, results['test_ssim'], label='Test SSIM')
+    # axes[1].plot(epochs, results['test_lpips'], label='Test LPIPS')
+    # axes[1].set_title("Test Metrics over Epochs")
+    # axes[1].set_xlabel("Epoch")
+    # axes[1].set_ylabel("Value")
+    # axes[1].legend()
+
+    # Plot PSNR
+    axes[1].plot(epochs,results['test_psnr'], label='Test PSNR', color='green')
+    axes[1].set_title("Test PSNR over Epochs")
     axes[1].set_xlabel("Epoch")
-    axes[1].set_ylabel("Value")
+    axes[1].set_ylabel("PSNR (dB)")
     axes[1].legend()
 
     plt.tight_layout()

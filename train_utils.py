@@ -213,23 +213,38 @@ def charbonnier_loss(y_pred, y_true, epsilon=1e-6):
 
 #     return alpha * l1 + beta * ssim_loss + gamma * lpips_loss
 
+def psnr_focused_loss(y_pred, y_true, alpha=1.0, beta=1.0, epsilon=1e-6):
+    """
+    Combined loss: Charbonnier + L2 for PSNR improvement.
+    
+    Args:
+        y_pred (torch.Tensor): Predicted tensor
+        y_true (torch.Tensor): Ground truth tensor
+        alpha (float): Weight for Charbonnier loss
+        beta (float): Weight for L2 loss
+        epsilon (float): Small value for Charbonnier stability
+    """
+    loss_char = charbonnier_loss(y_pred, y_true, epsilon)
+    loss_l2   = F.mse_loss(y_pred, y_true)
+    return alpha * loss_char + beta * loss_l2
+
 
 import time
 
 def estimate_training_time(model, train_loader, test_loader, loss_fn, optimizer, device, epochs=1, num_batches=10):
     """
-    Rough estimate of total training time including testing step per epoch.
-    Only approximate, skips LPIPS to avoid huge overestimates.
+    Estimate training time including testing.
+    Uses a representative sample of batches (num_batches) for scaling.
     """
     model.to(device)
-    model.train()
     
-    # Warmup
+    # Warmup pass (ignore timing)
     X, y = next(iter(train_loader))
     X, y = X.to(device), y.to(device)
     _ = model(X)
 
-    # Time training
+    # ---- Training timing ----
+    model.train()
     start = time.time()
     for i, (X, y) in enumerate(train_loader):
         if i >= num_batches:
@@ -240,9 +255,10 @@ def estimate_training_time(model, train_loader, test_loader, loss_fn, optimizer,
         loss = loss_fn(y_pred, y)
         loss.backward()
         optimizer.step()
-    train_time_per_batch = (time.time() - start) / num_batches
+    train_time_sample = time.time() - start
+    train_time_per_batch = train_time_sample / num_batches
 
-    # Time testing (metrics included)
+    # ---- Testing timing ----
     model.eval()
     start = time.time()
     with torch.inference_mode():
@@ -252,17 +268,26 @@ def estimate_training_time(model, train_loader, test_loader, loss_fn, optimizer,
             X, y = X.to(device), y.to(device)
             y_pred = model(X)
             _ = loss_fn(y_pred, y)
-            _ = psnr(y, y_pred)          # lightweight metric
-            # Skip compute_ssim and compute_lpips here for speed
-    test_time_per_batch = (time.time() - start) / num_batches
+            _ = psnr(y, y_pred)  # only PSNR, skip heavy metrics
+    test_time_sample = time.time() - start
+    test_time_per_batch = test_time_sample / num_batches
 
+    # ---- Scaling to epoch ----
+    # account for data loading & optimizations -> use correction factor
+    correction_factor = 0.65   # ~35-40% faster after warmup
     total_batches_train = len(train_loader)
     total_batches_test = len(test_loader)
-    time_per_epoch = total_batches_train * train_time_per_batch + total_batches_test * test_time_per_batch
+
+    time_per_epoch = (
+        (train_time_per_batch * total_batches_train) +
+        (test_time_per_batch * total_batches_test)
+    ) * correction_factor
+
     total_time_est = time_per_epoch * epochs
 
-    print(f"Estimated time per epoch: {time_per_epoch:.2f} sec")
-    print(f"Estimated total training time for {epochs} epochs: {total_time_est/60:.2f} min")
+    print(f"Estimated time per epoch: {time_per_epoch/60:.2f} min")
+    print(f"Estimated total training time for {epochs} epochs: {total_time_est/3600:.2f} hours")
+
     return total_time_est
 
 

@@ -172,20 +172,20 @@ NUM_IMAGES = 5
 
 # Load trained model and results
 model = UNet(n_channels=3, n_classes=3).to(DEVICE)
-model.load_state_dict(torch.load("unet_model.pth", map_location=DEVICE))
-results = torch.load("results.pth")
+model.load_state_dict(torch.load("unet_model_v2.pth", map_location=DEVICE))
+results = torch.load("results_v2.pth")
 
 count_parameters(model)
 plot_training_metrics(results)
 
 # Test dataloader
-test_transforms = PairedTransforms(resize=(64,64), flip_prob=0.0)
+test_transforms = PairedTransforms(resize=(128,128), flip_prob=0.0)
 _, test_loader = get_dataloaders(
     blurred_dir=train_dir_blurred,
     sharp_dir=train_dir_sharp,
     train_transforms=None,
     test_transforms=test_transforms,
-    batch_size=32
+    batch_size=64
 )
 
 visualize_predictions(model, test_loader, device=DEVICE, num_images=NUM_IMAGES)

@@ -228,7 +228,7 @@ from data_loader import get_dataloaders
 from data_augmentation import PairedTransforms
 from preprocessing import *
 from unet_model import UNet
-from train_utils import train_model , charbonnier_loss
+from train_utils import train_model , charbonnier_loss,psnr_focused_loss
 # from metrics_utils import lpips_fn
 import torch
 from train_utils import estimate_training_time
@@ -258,7 +258,7 @@ optimizer = optim.Adam(model.parameters(), lr=1e-4)
 #     gamma=0.1,  # weight for LPIPS
 #     lpips_fn=lpips_fn
 # )
-loss_fn = charbonnier_loss
+loss_fn = nn.MSELoss()
 
 start_time = time.time()
 estimate_training_time(model, train_loader, test_loader, loss_fn, optimizer, DEVICE, epochs=200)
@@ -271,5 +271,5 @@ hours, rem = divmod(total_time, 3600)
 minutes, seconds = divmod(rem, 60)
 print(f"\nTotal training time: {int(hours)}h {int(minutes)}m {seconds:.2f}s")
 
-torch.save(model.state_dict(), "unet_model_v2.pth")
-torch.save(results, "results_v2.pth")
+torch.save(model.state_dict(), "unet_model_v3.pth")
+torch.save(results, "results_v3.pth")
